@@ -1,0 +1,41 @@
+name: Weekly Momentum Review
+
+on:
+  schedule:
+    - cron: "0 9 * * 6"
+      timezone: "Europe/London"
+  workflow_dispatch:
+
+jobs:
+  run-weekly-review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run weekly momentum review
+        run: python weekly_momentum_review.py
+
+      - name: Send email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "Weekly Momentum Review"
+          to: ${{ secrets.MAIL_TO }}
+          from: ${{ secrets.MAIL_FROM }}
+          body: "Your email client does not support HTML."
+          html_body: file://market_email.html
